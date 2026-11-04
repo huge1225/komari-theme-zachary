@@ -1,0 +1,26 @@
+Komari Theme Zachary (komari-theme-zachary)
+Repository: https://github.com/huge1225/komari-theme-zachary
+Copyright 2026 Zachary
+
+This product is a Komari Monitor theme developed and maintained by Zachary.
+
+=========================================================================
+Upstream Attribution & Open Source Compliance Notices (Apache-2.0 Sec. 4)
+=========================================================================
+
+1. Frontend UI Base (Apache License 2.0):
+   - Project: nezha-dash / nezha-dash-v1
+   - Original Author: hamster1963 (https://github.com/hamster1963/nezha-dash-v1)
+   - License: Apache License, Version 2.0
+
+2. Inspiration & Monitoring Ecosystem:
+   - Nezha Monitor (https://github.com/nezhahq/nezha) — Licensed under WTFPL
+   - Komari Monitor (https://github.com/komari-monitor/komari) — Licensed under MIT License
+
+3. Summary of Modifications by Zachary:
+   - Replaced Nezha backend API & WebSocket client with a full Komari Monitor JSON-RPC 2.0 (`/api/rpc2`) and REST (`/api/*`) adapter layer (`src/lib/komari-adapter.ts`).
+   - Added real-time multi-currency exchange rate engine and fleet-wide / per-VPS remaining value (剩余价值) calculator (`src/lib/billing-value.ts`).
+   - Added 5th overview card for Total Remaining Value and expandable VPS asset leaderboard in `src/components/ServerOverview.tsx`.
+   - Added per-server cycle traffic usage progress bar (`src/components/TrafficUsageBar.tsx`) to `ServerCard.tsx` and `ServerCardInline.tsx`.
+   - Enhanced server detail subpage (`src/components/ServerDetailOverview.tsx`) with per-VPS remaining value breakdown, cycle traffic progress, virtualization badge, Swap usage, and real-time TCP/UDP/process counters.
+   - Added Komari managed theme configuration manifest (`komari-theme.json`) and packaging scripts (`build-theme.sh`).

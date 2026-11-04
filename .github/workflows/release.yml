@@ -1,0 +1,60 @@
+name: Build and Release Komari Theme
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build and package Komari theme zip
+        run: |
+          chmod +x ./build-theme.sh
+          ./build-theme.sh
+
+      - name: Prepare Release Tag
+        id: tag
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+          else
+            TAG_NAME="v1.2.$(date +'%y%m%d%H%M')"
+          fi
+          echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release (Komari Auto-Update Compatible)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag_name }}
+          name: "Release ${{ steps.tag.outputs.tag_name }}"
+          make_latest: true
+          # IMPORTANT: komari-theme-nezha.zip MUST be the first asset so Komari's
+          # getGitHubReleaseDownloadURL() picks assets[0].browser_download_url
+          files: |
+            komari-theme-nezha.zip
+          generate_release_notes: true

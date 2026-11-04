@@ -1,0 +1,247 @@
+{
+  "name": {
+    "zh-CN": "Komari 哪吒主题 (by Zachary)",
+    "en": "Komari Nezha Theme (by Zachary)"
+  },
+  "short": "NezhaDash",
+  "description": {
+    "zh-CN": "由 Zachary 开发的 Komari 探针哪吒 V1 风格主题，支持 VPS 剩余总价值实时汇率折算、节点框内周期流量进度条、全球节点地图、单行/双列视图及详情子页面全量账单与硬件监控。",
+    "en": "Nezha Dash V1 style theme for Komari Monitor by Zachary, featuring live exchange-rate VPS remaining value calculation, per-server cycle traffic bar, global D3 map, inline/grid views, and detailed billing & hardware metrics."
+  },
+  "version": "1.2.0",
+  "author": "Zachary",
+  "url": "https://github.com/huge1225/komari-theme-zachary",
+  "preview": "preview.webp",
+  "configuration": {
+    "type": "managed",
+    "name": {
+      "zh-CN": "哪吒主题设置 (Nezha Dash)",
+      "en": "Nezha Dash Theme Settings"
+    },
+    "data": [
+      {
+        "name": {
+          "zh-CN": "外观与品牌设置",
+          "en": "Branding & Appearance"
+        },
+        "type": "title"
+      },
+      {
+        "key": "customLogo",
+        "name": {
+          "zh-CN": "自定义 Logo URL",
+          "en": "Custom Logo URL"
+        },
+        "type": "string",
+        "default": "",
+        "help": {
+          "zh-CN": "导航栏左上角 Logo 图片地址，留空则使用默认哪吒风格图标。",
+          "en": "URL for the top-left brand logo image. Leave empty for the default icon."
+        }
+      },
+      {
+        "key": "customDesc",
+        "name": {
+          "zh-CN": "自定义副标题描述",
+          "en": "Custom Subtitle Description"
+        },
+        "type": "string",
+        "default": "",
+        "help": {
+          "zh-CN": "导航栏站点名称右侧的副标题文字，留空则自动读取 Komari 站点描述。",
+          "en": "Subtitle displayed next to the site name. Leave empty to use the Komari site description."
+        }
+      },
+      {
+        "key": "customLinks",
+        "name": {
+          "zh-CN": "导航栏自定义链接 (JSON)",
+          "en": "Custom Header Links (JSON)"
+        },
+        "type": "string",
+        "default": "",
+        "help": {
+          "zh-CN": "格式示例：[{\"name\":\"GitHub\",\"link\":\"https://github.com\"}]",
+          "en": "JSON array of links, e.g. [{\"name\":\"GitHub\",\"link\":\"https://github.com\"}]"
+        }
+      },
+      {
+        "key": "forceTheme",
+        "name": {
+          "zh-CN": "强制明暗主题",
+          "en": "Force Color Theme"
+        },
+        "type": "select",
+        "options": "system,light,dark",
+        "default": "system",
+        "help": {
+          "zh-CN": "设置为 light 或 dark 将固定主题外观；system 为跟随系统与用户切换。",
+          "en": "Set to light or dark to lock theme mode, or system to follow user preference."
+        }
+      },
+      {
+        "key": "backgroundImage",
+        "name": {
+          "zh-CN": "桌面端背景图片 URL",
+          "en": "Desktop Background Image URL"
+        },
+        "type": "string",
+        "default": "",
+        "help": {
+          "zh-CN": "设置后页面将启用半透明卡片背景与导航栏一键隐藏背景按钮。",
+          "en": "Sets a custom background image on desktop and enables translucent cards."
+        }
+      },
+      {
+        "key": "mobileBackgroundImage",
+        "name": {
+          "zh-CN": "移动端背景图片 URL",
+          "en": "Mobile Background Image URL"
+        },
+        "type": "string",
+        "default": "",
+        "help": {
+          "zh-CN": "移动端专属背景图 URL，留空则与桌面端一致。",
+          "en": "Sets a custom background image on mobile devices."
+        }
+      },
+      {
+        "name": {
+          "zh-CN": "插画与卡片布局",
+          "en": "Illustration & Card Layout"
+        },
+        "type": "title"
+      },
+      {
+        "key": "disableAnimatedMan",
+        "name": {
+          "zh-CN": "隐藏右上角挂件插画",
+          "en": "Hide Header Illustration"
+        },
+        "type": "switch",
+        "default": true,
+        "help": {
+          "zh-CN": "默认隐藏网络总览卡片上方的插画挂件。",
+          "en": "Hide the floating illustration above the network overview card."
+        }
+      },
+      {
+        "key": "customIllustration",
+        "name": {
+          "zh-CN": "自定义右上角插画 URL",
+          "en": "Custom Illustration URL"
+        },
+        "type": "string",
+        "default": "",
+        "help": {
+          "zh-CN": "可选：配置右上角自定义插画图片地址（需同时关闭“隐藏右上角挂件插画”开关）。",
+          "en": "Optional custom image URL to display above the network overview card."
+        }
+      },
+      {
+        "key": "showNetTransfer",
+        "name": {
+          "zh-CN": "在网格卡片中显示总流量徽章",
+          "en": "Show Total Transfer Badges in Card"
+        },
+        "type": "switch",
+        "default": true,
+        "help": {
+          "zh-CN": "在双列卡片视图底部显示上传/下载总流量胶囊徽章。",
+          "en": "Display total upload/download badges in grid server cards."
+        }
+      },
+      {
+        "key": "fixedTopServerName",
+        "name": {
+          "zh-CN": "卡片顶部固定节点名称（显示系统图标列）",
+          "en": "Fixed Top Server Name (Show OS Column)"
+        },
+        "type": "switch",
+        "default": false,
+        "help": {
+          "zh-CN": "开启后节点名称固定在卡片左上方，并在指标行额外显示操作系统图标与名称。",
+          "en": "Pin server name to the top of the card and show the OS icon column."
+        }
+      },
+      {
+        "key": "forceCardInline",
+        "name": {
+          "zh-CN": "默认启用单行紧凑列表视图",
+          "en": "Default to Inline Row View"
+        },
+        "type": "switch",
+        "default": false,
+        "help": {
+          "zh-CN": "桌面端默认以单行宽表卡片（Inline）模式展示所有服务器。",
+          "en": "Use the single-row inline table-card view by default on desktop."
+        }
+      },
+      {
+        "key": "forceShowMap",
+        "name": {
+          "zh-CN": "默认展开全球节点分布地图",
+          "en": "Default Show Global Map"
+        },
+        "type": "switch",
+        "default": false,
+        "help": {
+          "zh-CN": "进入首页时默认展开 D3 全球服务器区域分布交互地图。",
+          "en": "Expand the interactive global server map by default on the home page."
+        }
+      },
+      {
+        "key": "forceShowServices",
+        "name": {
+          "zh-CN": "默认展开流量周期与服务状态面板",
+          "en": "Default Show Services & Cycle Traffic"
+        },
+        "type": "switch",
+        "default": false,
+        "help": {
+          "zh-CN": "进入首页时默认展开周期流量统计卡片与 Ping 可用率状态条。",
+          "en": "Expand cycle traffic cards and ping service trackers by default."
+        }
+      },
+      {
+        "key": "forceUseSvgFlag",
+        "name": {
+          "zh-CN": "强制使用 SVG 国旗图标",
+          "en": "Force SVG Country Flags"
+        },
+        "type": "switch",
+        "default": true,
+        "help": {
+          "zh-CN": "开启后统一使用高清 SVG 国旗图标，避免 Windows 浏览器 Emoji 国旗显示为字母。",
+          "en": "Always render SVG flags instead of Unicode emoji flags."
+        }
+      },
+      {
+        "key": "forcePeakCutEnabled",
+        "name": {
+          "zh-CN": "网络延迟图默认开启削峰平滑 (EWMA)",
+          "en": "Default Enable Peak Cut in Network Chart"
+        },
+        "type": "switch",
+        "default": false,
+        "help": {
+          "zh-CN": "在节点详情页的网络监控延迟折线图中默认启用削峰平滑。",
+          "en": "Enable EWMA peak-cut smoothing by default on the network latency chart."
+        }
+      },
+      {
+        "key": "customFooterHtml",
+        "name": {
+          "zh-CN": "自定义页脚附加 HTML",
+          "en": "Custom Footer HTML"
+        },
+        "type": "richtext",
+        "default": "",
+        "help": {
+          "zh-CN": "在页脚附加显示的自定义 HTML 内容（如备案号或统计信息）。",
+          "en": "Optional custom HTML content rendered in the footer."
+        }
+      }
+    ]
+  }
+}

@@ -6,6 +6,7 @@ node_modules/
 dist/
 theme-package/
 *.zip
+!komari-theme-nezha.zip
 
 # Logs & coverage
 coverage/

@@ -487,6 +487,8 @@ export interface ServerValuation {
 	priceInTarget: number;
 	remainingValueNative: number;
 	remainingValueTarget: number;
+	dailyCostNative: number;
+	monthlyCostNative: number;
 	dailyCostTarget: number;
 	monthlyCostTarget: number;
 	yearlyCostTarget: number;
@@ -551,6 +553,7 @@ export function calculateServerValuation(
 			: 0;
 
 	const dailyNative = cycleDays > 0 && price > 0 ? price / cycleDays : 0;
+	const monthlyCostNative = dailyNative * 30;
 	const remainingValueNative =
 		isFree || isOneTime || isExpired ? 0 : dailyNative * remainingDaysExact;
 
@@ -588,6 +591,8 @@ export function calculateServerValuation(
 		priceInTarget,
 		remainingValueNative,
 		remainingValueTarget,
+		dailyCostNative: dailyNative,
+		monthlyCostNative,
 		dailyCostTarget,
 		monthlyCostTarget,
 		yearlyCostTarget,

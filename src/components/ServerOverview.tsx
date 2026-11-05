@@ -302,7 +302,7 @@ export default function ServerOverview({
 						<section className="flex flex-col gap-1 w-full">
 							<div className="flex items-center w-full justify-between gap-1">
 								<p className="text-sm font-medium md:text-base flex items-center gap-1 text-nowrap">
-									<span>剩余总价值</span>
+									<span>剩余价值 / 月估</span>
 								</p>
 								<div className="flex items-center gap-1">
 									<button
@@ -330,13 +330,13 @@ export default function ServerOverview({
 									({fleetValuation.paidCount}台计费)
 								</span>
 							</section>
-							<section className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10.5px] text-muted-foreground">
-								<span className="text-nowrap font-medium">
-									月均 {targetSymbol}
-									{fleetValuation.totalMonthlyCost.toFixed(1)}
+							<section className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10.5px]">
+								<span className="text-nowrap font-semibold text-emerald-600 dark:text-emerald-400">
+									每月预估: {targetSymbol}
+									{fleetValuation.totalMonthlyCost.toFixed(2)}
 								</span>
-								<span className="text-nowrap font-medium">
-									年付 {targetSymbol}
+								<span className="text-nowrap font-medium text-muted-foreground">
+									年预估 {targetSymbol}
 									{fleetValuation.totalYearlyCost.toFixed(0)}
 								</span>
 							</section>
@@ -359,8 +359,14 @@ export default function ServerOverview({
 							<div className="flex items-center gap-2 flex-wrap">
 								<BanknotesIcon className="size-4 text-amber-500" />
 								<h3 className="text-xs sm:text-sm font-semibold">
-									VPS 资产与剩余价值实时排行榜
+									VPS 资产、剩余价值与每月预估费用明细
 								</h3>
+								<span className="rounded-[5px] bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+									每月预估总费用: {targetSymbol}
+									{fleetValuation.totalMonthlyCost.toFixed(2)}/月 · 年预估:{" "}
+									{targetSymbol}
+									{fleetValuation.totalYearlyCost.toFixed(2)}/年
+								</span>
 								<span className="text-[11px] text-muted-foreground">
 									({isLive ? "实时汇率" : "基准汇率"}:
 									{targetCurrency !== "USD" &&
@@ -415,13 +421,23 @@ export default function ServerOverview({
 												{item.serverName}
 											</span>
 										</div>
-										<span className="text-xs font-bold font-mono text-amber-600 dark:text-amber-400 shrink-0">
-											{item.isFree
-												? "免费"
-												: item.isOneTime
-													? "永久/一次性"
-													: `${targetSymbol}${item.remainingValueTarget.toFixed(2)}`}
-										</span>
+										<div className="flex items-center gap-1.5 shrink-0">
+											{!item.isFree &&
+												!item.isOneTime &&
+												item.monthlyCostTarget > 0 && (
+													<span className="rounded-[4px] bg-emerald-500/10 px-1 py-0.5 text-[10px] font-semibold font-mono text-emerald-600 dark:text-emerald-400">
+														月估 {targetSymbol}
+														{item.monthlyCostTarget.toFixed(1)}
+													</span>
+												)}
+											<span className="text-xs font-bold font-mono text-amber-600 dark:text-amber-400">
+												{item.isFree
+													? "免费"
+													: item.isOneTime
+														? "永久/一次性"
+														: `余值 ${targetSymbol}${item.remainingValueTarget.toFixed(2)}`}
+											</span>
+										</div>
 									</div>
 
 									<div className="flex items-center justify-between text-[10.5px] text-muted-foreground">

@@ -66,21 +66,25 @@ export default function BillingInfo({
 	);
 
 	let remainingValueTarget = 0;
-	if (
-		!isFree &&
-		!isOneTime &&
-		!isNeverExpire &&
-		price > 0 &&
-		cycleDays > 0 &&
-		daysLeftObject.days > 0
-	) {
-		const remainingNative = (price / cycleDays) * daysLeftObject.days;
-		remainingValueTarget = convertCurrencyAmount(
-			remainingNative,
+	let monthlyCostTarget = 0;
+	if (!isFree && !isOneTime && price > 0 && cycleDays > 0) {
+		const monthlyNative = (price / cycleDays) * 30;
+		monthlyCostTarget = convertCurrencyAmount(
+			monthlyNative,
 			currencyCode,
 			targetCurrency,
 			ratesFromCny,
 		).converted;
+
+		if (!isNeverExpire && daysLeftObject.days > 0) {
+			const remainingNative = (price / cycleDays) * daysLeftObject.days;
+			remainingValueTarget = convertCurrencyAmount(
+				remainingNative,
+				currencyCode,
+				targetCurrency,
+				ratesFromCny,
+			).converted;
+		}
 	}
 
 	return daysLeftObject.days >= 0 ? (
@@ -88,10 +92,22 @@ export default function BillingInfo({
 			{parsedData.billingDataMod.amount &&
 			parsedData.billingDataMod.amount !== "0" &&
 			parsedData.billingDataMod.amount !== "-1" ? (
-				<p className={cn("text-[10px] text-muted-foreground text-nowrap")}>
-					{t("billingInfo.price")}: {parsedData.billingDataMod.amount}/
-					{parsedData.billingDataMod.cycle}
-				</p>
+				<div
+					className={cn(
+						"flex flex-wrap items-center gap-x-1 text-[10px] text-muted-foreground",
+					)}
+				>
+					<span className="text-nowrap">
+						{t("billingInfo.price")}: {parsedData.billingDataMod.amount}/
+						{parsedData.billingDataMod.cycle}
+					</span>
+					{monthlyCostTarget > 0 && (
+						<span className="text-nowrap font-medium text-emerald-600 dark:text-emerald-400">
+							· 月估 {targetSymbol}
+							{monthlyCostTarget.toFixed(1)}
+						</span>
+					)}
+				</div>
 			) : parsedData.billingDataMod.amount === "0" ? (
 				<p className={cn("text-[10px] text-green-600 ")}>
 					{t("billingInfo.free")}

@@ -287,20 +287,34 @@ export default function ServerDetailOverview({
 
 									<div className="flex flex-col gap-0.5">
 										<span className="text-[11px] text-muted-foreground">
-											折算持有成本
+											每月预估费用 ({targetCurrency})
 										</span>
-										<div className="text-xs sm:text-sm font-semibold">
-											{valuation.isFree || valuation.isOneTime ? (
-												"无周期续费成本"
-											) : (
-												<span>
-													月均 {valuation.targetCurrencySymbol}
-													{valuation.monthlyCostTarget.toFixed(2)} · 日均{" "}
+										{valuation.isFree || valuation.isOneTime ? (
+											<div className="text-xs sm:text-sm font-semibold">
+												无周期续费费用
+											</div>
+										) : (
+											<div className="flex flex-col gap-0.5">
+												<div className="flex items-baseline gap-1.5 flex-wrap">
+													<span className="text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">
+														{valuation.targetCurrencySymbol}
+														{valuation.monthlyCostTarget.toFixed(2)}/月
+													</span>
+													{valuation.nativeCurrencyCode !== targetCurrency && (
+														<span className="text-[11px] font-mono text-muted-foreground">
+															({valuation.nativeCurrencySymbol}
+															{valuation.monthlyCostNative.toFixed(2)}/月)
+														</span>
+													)}
+												</div>
+												<span className="text-[10.5px] text-muted-foreground">
+													日均 {valuation.targetCurrencySymbol}
+													{valuation.dailyCostTarget.toFixed(2)} · 年预估{" "}
 													{valuation.targetCurrencySymbol}
-													{valuation.dailyCostTarget.toFixed(2)}
+													{valuation.yearlyCostTarget.toFixed(1)}
 												</span>
-											)}
-										</div>
+											</div>
+										)}
 									</div>
 
 									<div className="flex flex-col gap-0.5">

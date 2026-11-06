@@ -485,6 +485,14 @@ function isValidExpiryDate(dateStr?: string): boolean {
 	return parsed.isValid() && parsed.year() > 1971;
 }
 
+function isPermanentExpiryDate(dateStr?: string): boolean {
+	if (!dateStr) return false;
+	if (dateStr.startsWith("0000-00-00")) return true;
+	const parsed = dayjs(dateStr);
+	if (!parsed.isValid()) return false;
+	return parsed.year() >= 2090 || parsed.diff(dayjs(), "day") >= 3650;
+}
+
 export function synthesizePublicNote(node: KomariNode): string {
 	// 1. Check if public_remark already contains Nezha JSON
 	let existingObj: Record<string, any> | null = null;
@@ -503,11 +511,17 @@ export function synthesizePublicNote(node: KomariNode): string {
 
 	// 2. Synthesize billingDataMod from Komari native billing fields if not already specified
 	const hasValidExpiry = isValidExpiryDate(node.expired_at);
+	const isPermanent =
+		isPermanentExpiryDate(node.expired_at) ||
+		node.price === -1 ||
+		(typeof node.billing_cycle === "number" && node.billing_cycle >= 3650);
 	const hasPrice =
 		typeof node.price === "number" && (node.price > 0 || node.price === -1);
 
 	if (!result.billingDataMod && (hasValidExpiry || hasPrice)) {
-		const cycleLabel = mapBillingCycleToLabel(node.billing_cycle);
+		const cycleLabel = isPermanent
+			? "永久"
+			: mapBillingCycleToLabel(node.billing_cycle);
 		const currency = node.currency || "￥";
 		let amount = "";
 		if (node.price === -1) {
@@ -518,13 +532,15 @@ export function synthesizePublicNote(node: KomariNode): string {
 			amount = "0";
 		}
 
-		const endDate = hasValidExpiry
-			? node.expired_at!
-			: dayjs().add(30, "day").toISOString();
+		const endDate = isPermanent
+			? "0000-00-00T23:59:59Z"
+			: hasValidExpiry
+				? node.expired_at!
+				: dayjs().add(30, "day").toISOString();
 		const startDate =
 			node.created_at && isValidExpiryDate(node.created_at)
 				? node.created_at
-				: dayjs(endDate)
+				: dayjs()
 						.subtract(node.billing_cycle || 30, "day")
 						.toISOString();
 

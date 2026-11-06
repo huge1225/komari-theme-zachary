@@ -446,17 +446,19 @@ export default function ServerOverview({
 											{item.isFree
 												? "免费"
 												: item.isOneTime
-													? "一次性"
+													? item.nativePrice > 0
+														? `${item.nativeCurrencySymbol}${item.nativePrice}/永久`
+														: "一次性/永久"
 													: `${item.nativeCurrencySymbol}${item.nativePrice}/${item.cycleLabel}`}
 											{item.nativeCurrencyCode !== targetCurrency &&
 											!item.isFree &&
-											!item.isOneTime
+											item.nativePrice > 0
 												? ` (≈${targetSymbol}${item.priceInTarget.toFixed(1)})`
 												: ""}
 										</span>
 										<span>
 											{item.isOneTime
-												? "长期有效"
+												? "永久有效"
 												: item.isExpired
 													? "已过期"
 													: `剩余 ${item.remainingDays} 天 (${(item.remainingPercentage * 100).toFixed(0)}%)`}

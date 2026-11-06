@@ -43,6 +43,9 @@ export default function BillingInfo({
 				daysLeftObject = getDaysBetweenDatesWithAutoRenewal(
 					parsedData.billingDataMod,
 				);
+				if (daysLeftObject.days >= 3650) {
+					isNeverExpire = true;
+				}
 			} catch (error) {
 				console.error(error);
 				return (
@@ -55,15 +58,27 @@ export default function BillingInfo({
 	}
 
 	const meta = parsedData.komariMeta;
-	const { price, currencyCode, isFree, isOneTime } = parseAmountAndCurrency(
-		parsedData.billingDataMod.amount,
-		meta?.currency,
-		meta?.price,
-	);
+	const { price, currencyCode, isFree, isOneTime: parsedOneTime } =
+		parseAmountAndCurrency(
+			parsedData.billingDataMod.amount,
+			meta?.currency,
+			meta?.price,
+		);
 	const { cycleDays } = resolveCycleDaysAndMonths(
 		parsedData.billingDataMod.cycle,
 		meta?.billingCycle,
 	);
+
+	const isOneTime =
+		parsedOneTime ||
+		isNeverExpire ||
+		cycleDays >= 3650 ||
+		/永久|终身|买断|lifetime|permanent|one-?time/i.test(
+			parsedData.billingDataMod.cycle || "",
+		);
+	if (isOneTime) {
+		isNeverExpire = true;
+	}
 
 	let remainingValueTarget = 0;
 	let monthlyCostTarget = 0;

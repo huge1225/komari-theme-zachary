@@ -508,8 +508,13 @@ export function calculateServerValuation(
 		return null;
 	}
 
-	const { price, currencyCode, currencySymbol, isFree, isOneTime } =
-		parseAmountAndCurrency(billing?.amount, meta?.currency, meta?.price);
+	const {
+		price,
+		currencyCode,
+		currencySymbol,
+		isFree,
+		isOneTime: parsedOneTime,
+	} = parseAmountAndCurrency(billing?.amount, meta?.currency, meta?.price);
 
 	const { cycleDays, months, label: cycleLabel } = resolveCycleDaysAndMonths(
 		billing?.cycle,
@@ -522,7 +527,9 @@ export function calculateServerValuation(
 			: billing?.autoRenewal === "1";
 
 	const rawEndDate = meta?.expiredAt || billing?.endDate || "";
-	const parsedEndMs = rawEndDate ? dayjs(rawEndDate).valueOf() : NaN;
+	const isZeroEnd = rawEndDate.startsWith("0000-00-00");
+	const parsedEndMs =
+		rawEndDate && !isZeroEnd ? dayjs(rawEndDate).valueOf() : NaN;
 	const hasValidEnd =
 		Number.isFinite(parsedEndMs) &&
 		!rawEndDate.startsWith("0001-01-01") &&
@@ -547,12 +554,21 @@ export function calculateServerValuation(
 	const remainingDaysExact = isExpired ? 0 : Math.max(0, diffMs / 86_400_000);
 	const remainingDays = isExpired ? 0 : Math.max(0, Math.ceil(remainingDaysExact));
 
-	const remainingPercentage =
-		cycleDays > 0
+	const isOneTime =
+		parsedOneTime ||
+		isZeroEnd ||
+		remainingDays >= 3650 ||
+		cycleDays >= 3650 ||
+		/永久|终身|买断|lifetime|permanent|one-?time/i.test(billing?.cycle || "");
+
+	const remainingPercentage = isOneTime
+		? 1
+		: cycleDays > 0
 			? Math.min(1, Math.max(0, remainingDaysExact / cycleDays))
 			: 0;
 
-	const dailyNative = cycleDays > 0 && price > 0 ? price / cycleDays : 0;
+	const dailyNative =
+		!isOneTime && cycleDays > 0 && price > 0 ? price / cycleDays : 0;
 	const monthlyCostNative = dailyNative * 30;
 	const remainingValueNative =
 		isFree || isOneTime || isExpired ? 0 : dailyNative * remainingDaysExact;
@@ -562,7 +578,9 @@ export function calculateServerValuation(
 
 	const remainingValueTarget = remainingValueNative * exchangeRateToTarget;
 	const dailyCostTarget =
-		cycleDays > 0 && priceInTarget > 0 ? priceInTarget / cycleDays : 0;
+		!isOneTime && cycleDays > 0 && priceInTarget > 0
+			? priceInTarget / cycleDays
+			: 0;
 	const monthlyCostTarget = dailyCostTarget * 30;
 	const yearlyCostTarget = dailyCostTarget * 365;
 

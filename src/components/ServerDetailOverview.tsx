@@ -324,7 +324,7 @@ export default function ServerDetailOverview({
 										<div className="flex items-center gap-1.5 flex-wrap text-xs font-semibold">
 											<span>
 												{valuation.isOneTime
-													? "长期有效"
+													? "永久有效"
 													: valuation.endDateIso
 														? dayjs(valuation.endDateIso).format("YYYY-MM-DD")
 														: "未设置"}
@@ -348,7 +348,11 @@ export default function ServerDetailOverview({
 												variant="outline"
 												className="text-[9.5px] px-1.5 py-0 rounded-[5px]"
 											>
-												{valuation.autoRenewal ? "自动续费" : "手动续费"}
+												{valuation.isOneTime
+													? "长期买断"
+													: valuation.autoRenewal
+														? "自动续费"
+														: "手动续费"}
 											</Badge>
 										</div>
 									</div>

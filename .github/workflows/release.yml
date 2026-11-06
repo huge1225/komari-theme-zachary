@@ -17,6 +17,25 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Release Version & Tag
+        id: version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            RAW_TAG="${GITHUB_REF#refs/tags/}"
+            THEME_VERSION="${RAW_TAG#v}"
+            TAG_NAME="v${THEME_VERSION}"
+          else
+            BASE_MM=$(python3 -c 'import json; v=json.load(open("package.json")).get("version","1.2.0").split("."); print(f"{v[0]}.{v[1]}")')
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+            THEME_VERSION="${BASE_MM}.${COMMIT_COUNT}"
+            TAG_NAME="v${THEME_VERSION}"
+          fi
+          echo "theme_version=${THEME_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "Resolved Theme Version: ${THEME_VERSION} (Tag: ${TAG_NAME})"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -31,25 +50,17 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build and package Komari theme zip
+        env:
+          THEME_VERSION: ${{ steps.version.outputs.theme_version }}
         run: |
           chmod +x ./build-theme.sh
           ./build-theme.sh
 
-      - name: Prepare Release Tag
-        id: tag
-        run: |
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            TAG_NAME="${GITHUB_REF#refs/tags/}"
-          else
-            TAG_NAME="v1.2.$(date +'%y%m%d%H%M')"
-          fi
-          echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
-
       - name: Create GitHub Release (Komari Auto-Update Compatible)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.tag_name }}
-          name: "Release ${{ steps.tag.outputs.tag_name }}"
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          name: "Release ${{ steps.version.outputs.tag_name }}"
           make_latest: true
           # IMPORTANT: komari-theme-nezha.zip MUST be the first asset so Komari's
           # getGitHubReleaseDownloadURL() picks assets[0].browser_download_url

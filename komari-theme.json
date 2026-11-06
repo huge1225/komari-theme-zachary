@@ -8,7 +8,7 @@
     "zh-CN": "由 Zachary 开发的 Komari 探针哪吒 V1 风格主题，支持 VPS 剩余总价值实时汇率折算、节点框内周期流量进度条、全球节点地图、单行/双列视图及详情子页面全量账单与硬件监控。",
     "en": "Nezha Dash V1 style theme for Komari Monitor by Zachary, featuring live exchange-rate VPS remaining value calculation, per-server cycle traffic bar, global D3 map, inline/grid views, and detailed billing & hardware metrics."
   },
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": "Zachary",
   "url": "https://github.com/huge1225/komari-theme-zachary",
   "preview": "preview.webp",

@@ -5,6 +5,13 @@ import { useTranslation } from "react-i18next";
 import OnlineHistorySkeleton from "@/components/loading/OnlineHistorySkeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
@@ -27,10 +34,10 @@ import {
 import { useRuntimeConfig } from "@/lib/runtime-config";
 import { cn } from "@/lib/utils";
 
-const DAY_OPTIONS = [1, 7, 30];
-// Online periods 默认展开最近 3 天，每次「展开更多」追加 10 天
+const DAY_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
+// Online periods 默认展开最近 3 天，每次「展开更多」追加 7 天
 const PERIODS_INITIAL_DAYS = 3;
-const PERIODS_EXPAND_STEP = 10;
+const PERIODS_EXPAND_STEP = 7;
 
 type PeriodMode = "online" | "offline";
 
@@ -125,57 +132,33 @@ function DaysSelector({
 	onDaysChange: (days: number) => void;
 }) {
 	const { t } = useTranslation();
-	const { containerRef, enableIndicatorAnimation, indicator, setItemRef } =
-		useActiveIndicator<number>(DAY_OPTIONS, selectedDays);
+	const formatDayLabel = (d: number) => `${d} ${t("serverDetail.days", "天")}`;
 
 	return (
 		<div
-			ref={containerRef}
 			data-testid="days-selector"
-			className="relative flex gap-0.5 flex-wrap p-0.5 bg-muted dark:bg-muted/40 rounded-full w-fit border border-border/60 dark:border-border"
+			className="relative flex items-center p-0.5 bg-muted dark:bg-muted/40 rounded-full w-fit border border-border/60 dark:border-border"
 		>
-			{indicator && (
-				<div
-					className="active-indicator-fade-in absolute left-0 top-0 z-10 bg-white dark:bg-background rounded-full ring-1 ring-border/60 dark:ring-border/40"
-					style={{
-						height: indicator.height,
-						transform: `translate(${indicator.x}px, ${indicator.y}px)`,
-						transition: indicator.shouldAnimate
-							? "transform 0.5s var(--timing), width 0.5s var(--timing), height 0.5s var(--timing)"
-							: "none",
-						width: indicator.width,
-					}}
-				/>
-			)}
-			{DAY_OPTIONS.map((days, index) => {
-				const isLocked = days > maxDays;
-				return (
-					<div
-						key={days}
-						aria-disabled={isLocked}
-						ref={setItemRef(index)}
-						onClick={() => {
-							if (!isLocked) {
-								if (selectedDays !== days) {
-									enableIndicatorAnimation();
-								}
-								onDaysChange(days);
-							}
-						}}
-						className={cn(
-							"relative z-20 cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
-							selectedDays === days
-								? "text-foreground"
-								: "text-muted-foreground hover:text-foreground",
-							isLocked && "cursor-not-allowed opacity-40 grayscale",
-						)}
-					>
-						<p className="whitespace-nowrap">
-							{t(`serverOnlineHistory.days${days}`)}
-						</p>
-					</div>
-				);
-			})}
+			<Select
+				value={String(selectedDays)}
+				onValueChange={(val) => onDaysChange(Number(val))}
+			>
+				<SelectTrigger className="h-7 w-auto min-w-[82px] gap-1.5 rounded-full border-0 bg-white dark:bg-background px-3 py-1 text-xs font-medium text-foreground ring-1 ring-border/60 dark:ring-border/40 shadow-none focus:ring-0 focus:ring-offset-0">
+					<SelectValue>{formatDayLabel(selectedDays)}</SelectValue>
+				</SelectTrigger>
+				<SelectContent align="end" className="min-w-[96px]">
+					{DAY_OPTIONS.map((days) => (
+						<SelectItem
+							key={days}
+							value={String(days)}
+							disabled={days > maxDays}
+							className="text-xs cursor-pointer"
+						>
+							{formatDayLabel(days)}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
 		</div>
 	);
 }
@@ -370,7 +353,11 @@ export default function ServerDetailOnlineHistory({
 				<DaysSelector
 					selectedDays={requestDays}
 					maxDays={
-						isLogin ? (guestMaxDays ?? online?.max_days ?? DAY_OPTIONS[2]) : 1
+						isLogin
+							? (guestMaxDays ??
+								online?.max_days ??
+								DAY_OPTIONS[DAY_OPTIONS.length - 1])
+							: 1
 					}
 					onDaysChange={(nextDays) => {
 						setDays(nextDays);

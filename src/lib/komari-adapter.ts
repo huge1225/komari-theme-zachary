@@ -1602,9 +1602,13 @@ export async function komariFetchService(
 // ============================================================================
 // Network Ping Latency Monitor (/api/v1/server/:id/service)
 // ============================================================================
-function periodToHours(period?: MonitorPeriod | MetricPeriod): number {
-	if (period === "7d") return 24 * 7;
-	if (period === "30d") return 24 * 30;
+function periodToHours(period?: MonitorPeriod | MetricPeriod | string): number {
+	if (!period) return 24;
+	const match = String(period).match(/^(\d+)d$/i);
+	if (match) {
+		const days = Math.max(1, Math.min(7, Number.parseInt(match[1], 10)));
+		return days * 24;
+	}
 	return 24;
 }
 
@@ -2063,7 +2067,7 @@ export async function komariFetchServerOnlineHistory(
 	const currentlyOnline = Boolean(status?.online ?? true);
 
 	const now = dayjs();
-	const safeDays = Math.max(1, Math.min(30, days || 1));
+	const safeDays = Math.max(1, Math.min(7, days || 1));
 	const windowStart = now.subtract(safeDays, "day").startOf("day");
 	const windowEnd = now;
 
@@ -2078,7 +2082,7 @@ export async function komariFetchServerOnlineHistory(
 			const cpuMetrics = await komariFetchServerMetrics(
 				uuid,
 				"cpu",
-				safeDays <= 1 ? "1d" : safeDays <= 7 ? "7d" : "30d",
+				`${safeDays}d` as MetricPeriod,
 				signal,
 			);
 			sampleTimestamps = cpuMetrics.data.data_points.map((p) => p.ts);
@@ -2175,7 +2179,7 @@ export async function komariFetchServerOnlineHistory(
 		server_id: numericId,
 		server_name: node?.name || String(serverIdOrUuid),
 		days: safeDays,
-		max_days: 30,
+		max_days: 7,
 		window_start: windowStart.toISOString(),
 		window_end: windowEnd.toISOString(),
 		total_online_seconds: totalOnlineSeconds,

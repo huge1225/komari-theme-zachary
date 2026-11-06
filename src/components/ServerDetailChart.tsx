@@ -29,7 +29,7 @@ export default function ServerDetailChart({
 }) {
 	const { t } = useTranslation();
 	const { lastData, connected, messageHistory } = useWebSocketContext();
-	const [selectedPeriod, setSelectedPeriod] = useState<ChartPeriod>("realtime");
+	const [selectedPeriod, setSelectedPeriod] = useState<ChartPeriod>("1d");
 	const [recentFrames, setRecentFrames] = useState<NezhaWebsocketResponse[]>([]);
 
 	const resolvedServerId = resolveServerNumericId(server_id);

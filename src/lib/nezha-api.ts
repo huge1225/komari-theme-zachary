@@ -34,7 +34,15 @@ export const fetchLoginUser = async (
 	return komariFetchLoginUser(options?.signal ?? undefined);
 };
 
-export type MonitorPeriod = "1d" | "7d" | "30d";
+export type MonitorPeriod =
+	| "1d"
+	| "2d"
+	| "3d"
+	| "4d"
+	| "5d"
+	| "6d"
+	| "7d"
+	| "30d";
 
 export const fetchMonitor = async (
 	server_id: number | string,

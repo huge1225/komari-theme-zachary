@@ -1,14 +1,32 @@
-import { useMemo } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useActiveIndicator } from "@/hooks/use-active-indicator";
 import type { ChartPeriod } from "@/hooks/use-metric-history";
 import { cn } from "@/lib/utils";
+import type { MetricPeriod } from "@/types/nezha-api";
+
+const DAY_PERIOD_OPTIONS: { value: MetricPeriod; days: number }[] = [
+	{ value: "1d", days: 1 },
+	{ value: "2d", days: 2 },
+	{ value: "3d", days: 3 },
+	{ value: "4d", days: 4 },
+	{ value: "5d", days: 5 },
+	{ value: "6d", days: 6 },
+	{ value: "7d", days: 7 },
+];
+
 export function PeriodSelector({
 	selectedPeriod,
 	onPeriodChange,
@@ -21,102 +39,104 @@ export function PeriodSelector({
 	isTsdbEnabled: boolean;
 }) {
 	const { t } = useTranslation();
+	const [lastDayPeriod, setLastDayPeriod] = useState<MetricPeriod>(
+		selectedPeriod !== "realtime" ? selectedPeriod : "1d",
+	);
 
-	const periods = useMemo<{ value: ChartPeriod; label: string }[]>(
-		() => [
-			{ value: "realtime", label: t("serverDetailChart.realtime") },
-			{ value: "1d", label: t("serverDetailChart.period1d") },
-			{ value: "7d", label: t("serverDetailChart.period7d") },
-			{ value: "30d", label: t("serverDetailChart.period30d") },
-		],
-		[t],
+	const activeDayPeriod: MetricPeriod =
+		selectedPeriod !== "realtime" ? selectedPeriod : lastDayPeriod;
+	const isRealtime = selectedPeriod === "realtime";
+	const isHistoryActive = !isRealtime;
+	const isLocked = !isTsdbEnabled || !isLogin;
+
+	const formatDayLabel = (days: number) =>
+		`${days} ${t("serverDetail.days", "天")}`;
+
+	const handleSelectDayPeriod = (val: string) => {
+		const nextPeriod = val as MetricPeriod;
+		setLastDayPeriod(nextPeriod);
+		onPeriodChange(nextPeriod);
+	};
+
+	const dayDropdown = (
+		<div
+			onClick={() => {
+				if (!isLocked && isRealtime) {
+					onPeriodChange(activeDayPeriod);
+				}
+			}}
+			className="flex items-center"
+		>
+			<Select
+				value={activeDayPeriod}
+				onValueChange={handleSelectDayPeriod}
+				disabled={isLocked}
+			>
+				<SelectTrigger
+					className={cn(
+						"h-7 w-auto min-w-[76px] gap-1.5 rounded-full border-0 px-3 py-1 text-xs font-medium shadow-none focus:ring-0 focus:ring-offset-0 transition-all",
+						isHistoryActive
+							? "bg-white dark:bg-background text-foreground ring-1 ring-border/60 dark:ring-border/40"
+							: "bg-transparent text-muted-foreground hover:text-foreground",
+						isLocked && "cursor-not-allowed opacity-40 grayscale",
+					)}
+				>
+					<SelectValue>
+						{formatDayLabel(
+							DAY_PERIOD_OPTIONS.find((o) => o.value === activeDayPeriod)
+								?.days ?? 1,
+						)}
+					</SelectValue>
+				</SelectTrigger>
+				<SelectContent align="start" className="min-w-[96px]">
+					{DAY_PERIOD_OPTIONS.map((option) => (
+						<SelectItem
+							key={option.value}
+							value={option.value}
+							className="text-xs cursor-pointer"
+						>
+							{formatDayLabel(option.days)}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+		</div>
 	);
-	const periodValues = useMemo(
-		() => periods.map((period) => period.value),
-		[periods],
-	);
-	const { containerRef, enableIndicatorAnimation, indicator, setItemRef } =
-		useActiveIndicator(periodValues, selectedPeriod);
 
 	return (
 		<TooltipProvider delayDuration={120}>
-			<div
-				ref={containerRef}
-				className="relative flex gap-0.5 mb-3 flex-wrap sm:-mt-5 -mt-3 p-0.5 bg-muted dark:bg-muted/40 rounded-full w-fit border border-border/60 dark:border-border"
-			>
-				{indicator && (
-					<div
-						className="active-indicator-fade-in absolute left-0 top-0 z-10 bg-white dark:bg-background rounded-full ring-1 ring-border/60 dark:ring-border/40"
-						style={{
-							height: indicator.height,
-							transform: `translate(${indicator.x}px, ${indicator.y}px)`,
-							transition: indicator.shouldAnimate
-								? "transform 0.5s var(--timing), width 0.5s var(--timing), height 0.5s var(--timing)"
-								: "none",
-							width: indicator.width,
-						}}
-					/>
+			<div className="relative flex items-center gap-1 mb-3 flex-wrap sm:-mt-5 -mt-3 p-0.5 bg-muted dark:bg-muted/40 rounded-full w-fit border border-border/60 dark:border-border">
+				<button
+					type="button"
+					onClick={() => onPeriodChange("realtime")}
+					className={cn(
+						"relative cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-all",
+						isRealtime
+							? "bg-white dark:bg-background text-foreground ring-1 ring-border/60 dark:ring-border/40"
+							: "text-muted-foreground hover:text-foreground",
+					)}
+				>
+					<div className="relative z-20 flex items-center gap-1.5">
+						<span className="inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 dark:bg-emerald-400"></span>
+						{t("serverDetailChart.realtime", "实时")}
+					</div>
+				</button>
+
+				{isLocked ? (
+					<Tooltip>
+						<TooltipTrigger asChild>{dayDropdown}</TooltipTrigger>
+						<TooltipContent>
+							{!isTsdbEnabled
+								? t(
+										"serverDetailChart.tsdbRequired",
+										"Enable TSDB to use historical data",
+									)
+								: t("serverDetailChart.loginRequired", "Please login to view")}
+						</TooltipContent>
+					</Tooltip>
+				) : (
+					dayDropdown
 				)}
-				{periods.map((period, index) => {
-					const isHistoryPeriod = period.value !== "realtime";
-					const isLockedByTsdb = !isTsdbEnabled && isHistoryPeriod;
-					// Only realtime and 1d are available for non-logged-in users
-					const isLockedByLogin =
-						!isLockedByTsdb &&
-						!isLogin &&
-						period.value !== "realtime" &&
-						period.value !== "1d";
-					const isLocked = isLockedByTsdb || isLockedByLogin;
-
-					const periodItem = (
-						<div
-							ref={setItemRef(index)}
-							onClick={() => {
-								if (!isLocked) {
-									if (selectedPeriod !== period.value) {
-										enableIndicatorAnimation();
-									}
-									onPeriodChange(period.value);
-								}
-							}}
-							className={cn(
-								"relative cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
-								selectedPeriod === period.value
-									? "text-foreground"
-									: "text-muted-foreground hover:text-foreground",
-								isLocked && "cursor-not-allowed opacity-40 grayscale",
-							)}
-						>
-							<div className="relative z-20 flex items-center gap-1.5">
-								{period.value === "realtime" && (
-									<span className="inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 dark:bg-emerald-400"></span>
-								)}
-								{period.label}
-							</div>
-						</div>
-					);
-
-					if (isLockedByTsdb || isLockedByLogin) {
-						return (
-							<Tooltip key={period.value}>
-								<TooltipTrigger asChild>{periodItem}</TooltipTrigger>
-								<TooltipContent>
-									{isLockedByTsdb
-										? t(
-												"serverDetailChart.tsdbRequired",
-												"Enable TSDB to use historical data",
-											)
-										: t(
-												"serverDetailChart.loginRequired",
-												"Please login to view",
-											)}
-								</TooltipContent>
-							</Tooltip>
-						);
-					}
-
-					return <div key={period.value}>{periodItem}</div>;
-				})}
 			</div>
 		</TooltipProvider>
 	);

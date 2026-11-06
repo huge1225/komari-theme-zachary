@@ -187,8 +187,24 @@ export type MetricType =
 	| "uptime"
 	| "gpu";
 
-export type MetricPeriod = "1d" | "7d" | "30d";
-export type MonitorPeriod = "1d" | "7d" | "30d";
+export type MetricPeriod =
+	| "1d"
+	| "2d"
+	| "3d"
+	| "4d"
+	| "5d"
+	| "6d"
+	| "7d"
+	| "30d";
+export type MonitorPeriod =
+	| "1d"
+	| "2d"
+	| "3d"
+	| "4d"
+	| "5d"
+	| "6d"
+	| "7d"
+	| "30d";
 
 export interface MetricDataPoint {
 	ts: number;

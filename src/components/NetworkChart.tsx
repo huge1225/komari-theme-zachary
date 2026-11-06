@@ -38,13 +38,19 @@ import {
 	buildMonitorSeries,
 	type MonitorChartPoint,
 } from "@/features/network-monitor/monitor-series";
-import { useActiveIndicator } from "@/hooks/use-active-indicator";
 import { fetchMonitor, type MonitorPeriod } from "@/lib/nezha-api";
 import { useRuntimeConfig } from "@/lib/runtime-config";
 import { cn, formatTime } from "@/lib/utils";
 import type { NezhaMonitor, ServerMonitorChart } from "@/types/nezha-api";
 import NetworkChartLoading from "./NetworkChartLoading";
 import { Label } from "./ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "./ui/select";
 import { Switch } from "./ui/switch";
 
 const MIN_PERIOD_LOADING_MS = 500;
@@ -530,61 +536,30 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 		<div className="flex flex-col gap-3">
 			<div className="flex items-center gap-3 sm:-mt-5 -mt-3 flex-wrap">
 				<TooltipProvider delayDuration={120}>
-					<div
-						ref={containerRef}
-						className="relative flex items-center gap-1 rounded-full bg-muted dark:bg-muted/40 p-0.5 border border-border/60 dark:border-border"
-					>
-						{indicator && (
-							<div
-								className="active-indicator-fade-in absolute left-0 top-0 z-10 bg-white dark:bg-background rounded-full ring-1 ring-border/60 dark:ring-border/40"
-								style={{
-									height: indicator.height,
-									transform: `translate(${indicator.x}px, ${indicator.y}px)`,
-									transition: indicator.shouldAnimate
-										? "transform 0.5s var(--timing), width 0.5s var(--timing), height 0.5s var(--timing)"
-										: "none",
-									width: indicator.width,
-								}}
-							/>
-						)}
-						{TIME_RANGE_OPTIONS.map((option, index) => {
-							const isLocked = !isLogin && option.value !== "1d";
-							const optionItem = (
-								<div
-									ref={setItemRef(index)}
-									onClick={() => {
-										if (!isLocked) {
-											if (period !== option.value) {
-												enableIndicatorAnimation();
-											}
-											onPeriodChange(option.value);
-										}
-									}}
-									className={cn(
-										"relative cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
-										period === option.value
-											? "text-foreground"
-											: "text-muted-foreground hover:text-foreground",
-										isLocked && "cursor-not-allowed opacity-40 grayscale",
-									)}
-								>
-									<span className="relative z-20">{option.label}</span>
-								</div>
-							);
-
-							if (isLocked) {
-								return (
-									<Tooltip key={option.value}>
-										<TooltipTrigger asChild>{optionItem}</TooltipTrigger>
-										<TooltipContent>
-											{t("monitor.loginRequired", "Please login to view")}
-										</TooltipContent>
-									</Tooltip>
-								);
-							}
-
-							return <div key={option.value}>{optionItem}</div>;
-						})}
+					<div className="relative flex items-center rounded-full bg-muted dark:bg-muted/40 p-0.5 border border-border/60 dark:border-border">
+						<Select
+							value={period}
+							onValueChange={(val) => onPeriodChange(val as MonitorPeriod)}
+							disabled={!isLogin}
+						>
+							<SelectTrigger className="h-7 w-auto min-w-[82px] gap-1.5 rounded-full border-0 bg-white dark:bg-background px-3 py-1 text-xs font-medium text-foreground ring-1 ring-border/60 dark:ring-border/40 shadow-none focus:ring-0 focus:ring-offset-0">
+								<SelectValue>
+									{TIME_RANGE_OPTIONS.find((o) => o.value === period)?.label ??
+										`1 ${t("serverDetail.days", "天")}`}
+								</SelectValue>
+							</SelectTrigger>
+							<SelectContent align="start" className="min-w-[96px]">
+								{TIME_RANGE_OPTIONS.map((option) => (
+									<SelectItem
+										key={option.value}
+										value={option.value}
+										className="text-xs cursor-pointer"
+									>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</div>
 				</TooltipProvider>
 				<div className="flex items-center space-x-2">

@@ -28,12 +28,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import {
 	buildMonitorSeries,
 	type MonitorChartPoint,
@@ -193,20 +188,17 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 	const [showPeriodLoading, setShowPeriodLoading] = React.useState(false);
 	const loadingStartedAtRef = React.useRef<number | null>(null);
 
-	const TIME_RANGE_OPTIONS = useMemo<{ value: MonitorPeriod; label: string }[]>(
-		() => [
-			{ value: "1d", label: t("monitor.period1d") },
-			{ value: "7d", label: t("monitor.period7d") },
-			{ value: "30d", label: t("monitor.period30d") },
-		],
+	const TIME_RANGE_OPTIONS = useMemo<
+		{ value: MonitorPeriod; days: number; label: string }[]
+	>(
+		() =>
+			([1, 2, 3, 4, 5, 6, 7] as const).map((days) => ({
+				value: `${days}d` as MonitorPeriod,
+				days,
+				label: `${days} ${t("serverDetail.days", "天")}`,
+			})),
 		[t],
 	);
-	const timeRangeValues = useMemo(
-		() => TIME_RANGE_OPTIONS.map((option) => option.value),
-		[TIME_RANGE_OPTIONS],
-	);
-	const { containerRef, enableIndicatorAnimation, indicator, setItemRef } =
-		useActiveIndicator(timeRangeValues, period);
 
 	React.useEffect(() => {
 		let timeoutId: number | undefined;

@@ -56,6 +56,12 @@ export default function ServerOverview({
 	const navigate = useNavigate();
 	const { status, setStatus } = useStatus();
 	const [showValuationPanel, setShowValuationPanel] = useState(false);
+	const [valuationSortBy, setValuationSortBy] = useState<
+		"remainingValue" | "monthlyCost"
+	>("remainingValue");
+	const [valuationSortOrder, setValuationSortOrder] = useState<"desc" | "asc">(
+		"desc",
+	);
 
 	const {
 		backgroundImage: customBackgroundImage,
@@ -82,6 +88,36 @@ export default function ServerOverview({
 			),
 		[servers, now, targetCurrency, ratesFromCny],
 	);
+
+	const sortedValuations = useMemo(() => {
+		const list = [...fleetValuation.valuations];
+		list.sort((a, b) => {
+			const valA =
+				valuationSortBy === "monthlyCost"
+					? a.monthlyCostTarget
+					: a.remainingValueTarget;
+			const valB =
+				valuationSortBy === "monthlyCost"
+					? b.monthlyCostTarget
+					: b.remainingValueTarget;
+			if (valA !== valB) {
+				return valuationSortOrder === "desc" ? valB - valA : valA - valB;
+			}
+			return b.remainingValueTarget - a.remainingValueTarget;
+		});
+		return list;
+	}, [fleetValuation.valuations, valuationSortBy, valuationSortOrder]);
+
+	const handleValuationSortClick = (
+		field: "remainingValue" | "monthlyCost",
+	) => {
+		if (valuationSortBy === field) {
+			setValuationSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
+		} else {
+			setValuationSortBy(field);
+			setValuationSortOrder("desc");
+		}
+	};
 
 	const cycleCurrency = (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -355,13 +391,13 @@ export default function ServerOverview({
 					)}
 				>
 					<CardContent className="p-4">
-						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-stone-200/60 dark:border-stone-800">
-							<div className="flex items-center gap-2 flex-wrap">
-								<BanknotesIcon className="size-4 text-amber-500" />
-								<h3 className="text-xs sm:text-sm font-semibold">
+						<div className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-stone-200/60 dark:border-stone-800">
+							<div className="flex items-center gap-2 flex-wrap min-w-0">
+								<BanknotesIcon className="size-4 shrink-0 text-amber-500" />
+								<h3 className="text-xs sm:text-sm font-semibold whitespace-nowrap">
 									VPS 资产、剩余价值与每月预估费用明细
 								</h3>
-								<span className="rounded-[5px] bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+								<span className="rounded-[5px] bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 whitespace-nowrap">
 									每月预估总费用: {targetSymbol}
 									{fleetValuation.totalMonthlyCost.toFixed(2)}/月 · 年预估:{" "}
 									{targetSymbol}
@@ -378,14 +414,50 @@ export default function ServerOverview({
 									)
 								</span>
 							</div>
-							<div className="flex items-center gap-1.5">
+							<div className="flex flex-wrap items-center gap-1.5 shrink-0">
+								<div className="flex items-center gap-1 mr-1">
+									<button
+										type="button"
+										onClick={() => handleValuationSortClick("remainingValue")}
+										className={cn(
+											"shrink-0 whitespace-nowrap rounded-[6px] px-2 py-0.5 text-[11px] font-medium transition-colors",
+											valuationSortBy === "remainingValue"
+												? "bg-amber-500/20 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/50"
+												: "bg-secondary text-muted-foreground hover:text-foreground",
+										)}
+									>
+										按剩余价值
+										{valuationSortBy === "remainingValue"
+											? valuationSortOrder === "desc"
+												? " ↓"
+												: " ↑"
+											: ""}
+									</button>
+									<button
+										type="button"
+										onClick={() => handleValuationSortClick("monthlyCost")}
+										className={cn(
+											"shrink-0 whitespace-nowrap rounded-[6px] px-2 py-0.5 text-[11px] font-medium transition-colors",
+											valuationSortBy === "monthlyCost"
+												? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/50"
+												: "bg-secondary text-muted-foreground hover:text-foreground",
+										)}
+									>
+										按预估月费
+										{valuationSortBy === "monthlyCost"
+											? valuationSortOrder === "desc"
+												? " ↓"
+												: " ↑"
+											: ""}
+									</button>
+								</div>
 								{TARGET_CURRENCIES.map((code) => (
 									<button
 										key={code}
 										type="button"
 										onClick={() => setTargetCurrency(code)}
 										className={cn(
-											"rounded-[6px] px-2 py-0.5 text-[11px] font-medium transition-colors",
+											"shrink-0 whitespace-nowrap rounded-[6px] px-2 py-0.5 text-[11px] font-medium transition-colors",
 											targetCurrency === code
 												? "bg-amber-500 text-white"
 												: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
@@ -397,7 +469,7 @@ export default function ServerOverview({
 								<button
 									type="button"
 									onClick={() => void refreshRates()}
-									className="rounded-[6px] bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+									className="shrink-0 whitespace-nowrap rounded-[6px] bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
 								>
 									刷新汇率
 								</button>
@@ -405,7 +477,7 @@ export default function ServerOverview({
 						</div>
 
 						<div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-							{fleetValuation.valuations.map((item) => (
+							{sortedValuations.map((item) => (
 								<div
 									key={item.serverId}
 									onClick={() => {

@@ -1,5 +1,6 @@
 import type { SortOrder, SortType } from "@/context/sort-context";
 import type { Status } from "@/context/status-context";
+import { calculateServerValuation } from "@/lib/billing-value";
 import type {
 	NezhaServer,
 	NezhaWebsocketResponse,
@@ -133,8 +134,25 @@ export function selectServers({
 		};
 	}
 
+	const isBillingSort =
+		sortType === "remaining value" || sortType === "monthly cost";
+	const valuationMap = new Map<
+		number,
+		{ remainingValue: number; monthlyCost: number }
+	>();
+	if (isBillingSort) {
+		const nowMs = nezhaWsData.now || Date.now();
+		for (const item of statusFilteredServers) {
+			const v = calculateServerValuation(item.server, nowMs);
+			valuationMap.set(item.server.id, {
+				remainingValue: v?.remainingValueTarget ?? 0,
+				monthlyCost: v?.monthlyCostTarget ?? 0,
+			});
+		}
+	}
+
 	const sortedServers = [...statusFilteredServers].sort((a, b) => {
-		if (sortType !== "name") {
+		if (sortType !== "name" && !isBillingSort) {
 			if (!a.online && b.online) return 1;
 			if (a.online && !b.online) return -1;
 			if (!a.online && !b.online) {
@@ -193,8 +211,23 @@ export function selectServers({
 					(a.server.state?.net_in_transfer ?? 0) -
 					(b.server.state?.net_in_transfer ?? 0);
 				break;
+			case "remaining value":
+				comparison =
+					(valuationMap.get(a.server.id)?.remainingValue ?? 0) -
+					(valuationMap.get(b.server.id)?.remainingValue ?? 0);
+				break;
+			case "monthly cost":
+				comparison =
+					(valuationMap.get(a.server.id)?.monthlyCost ?? 0) -
+					(valuationMap.get(b.server.id)?.monthlyCost ?? 0);
+				break;
 			default:
 				comparison = 0;
+		}
+
+		if (comparison === 0 && isBillingSort) {
+			if (a.online && !b.online) return -1;
+			if (!a.online && b.online) return 1;
 		}
 
 		return sortOrder === "asc" ? comparison : -comparison;

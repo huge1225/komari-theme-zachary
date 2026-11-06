@@ -165,7 +165,9 @@
 			"up": "Unggah",
 			"down": "Unduh",
 			"up_total": "Total Unggah",
-			"down_total": "Total Unduh"
+			"down_total": "Total Unduh",
+			"remaining_value": "Remaining Value",
+			"monthly_cost": "Monthly Cost"
 		}
 	},
 	"group": {

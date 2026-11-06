@@ -158,7 +158,9 @@
 			"up": "Загрузка",
 			"down": "Скачивание",
 			"up_total": "Загружено",
-			"down_total": "Скачано"
+			"down_total": "Скачано",
+			"remaining_value": "Остаточная стоимость",
+			"monthly_cost": "Ежемесячно"
 		}
 	},
 	"serverOnlineHistory": {

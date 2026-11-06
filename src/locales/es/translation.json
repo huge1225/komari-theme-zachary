@@ -154,7 +154,9 @@
 			"up": "Subida",
 			"down": "Bajada",
 			"up_total": "Subida total",
-			"down_total": "Bajada total"
+			"down_total": "Bajada total",
+			"remaining_value": "Valor restante",
+			"monthly_cost": "Costo mensual"
 		}
 	},
 	"serverOnlineHistory": {

@@ -180,7 +180,9 @@
 			"up": "Up",
 			"down": "Down",
 			"up_total": "Up Total",
-			"down_total": "Down Total"
+			"down_total": "Down Total",
+			"remaining_value": "Remaining Value",
+			"monthly_cost": "Monthly Cost"
 		}
 	},
 	"group": {

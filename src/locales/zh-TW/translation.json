@@ -174,7 +174,9 @@
 			"up": "上傳",
 			"down": "下載",
 			"up_total": "上傳總量",
-			"down_total": "下載總量"
+			"down_total": "下載總量",
+			"remaining_value": "剩餘價值",
+			"monthly_cost": "預估月費"
 		}
 	},
 	"group": {

@@ -139,7 +139,9 @@
 			"up": "Upload",
 			"down": "Download",
 			"up_total": "Upload ges.",
-			"down_total": "Download ges."
+			"down_total": "Download ges.",
+			"remaining_value": "Restwert",
+			"monthly_cost": "Monatliche Kosten"
 		}
 	},
 	"serverOnlineHistory": {

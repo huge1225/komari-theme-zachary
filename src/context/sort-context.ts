@@ -11,7 +11,9 @@ export type SortType =
 	| "up"
 	| "down"
 	| "up total"
-	| "down total";
+	| "down total"
+	| "remaining value"
+	| "monthly cost";
 
 export const SORT_TYPES: SortType[] = [
 	"default",
@@ -25,6 +27,8 @@ export const SORT_TYPES: SortType[] = [
 	"down",
 	"up total",
 	"down total",
+	"remaining value",
+	"monthly cost",
 ];
 
 export type SortOrder = "asc" | "desc";

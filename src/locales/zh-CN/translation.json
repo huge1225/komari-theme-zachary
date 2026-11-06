@@ -174,7 +174,9 @@
 			"up": "上传",
 			"down": "下载",
 			"up_total": "上传总量",
-			"down_total": "下载总量"
+			"down_total": "下载总量",
+			"remaining_value": "剩余价值",
+			"monthly_cost": "预估月费"
 		}
 	},
 	"group": {

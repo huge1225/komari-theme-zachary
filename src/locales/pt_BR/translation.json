@@ -161,7 +161,9 @@
 			"system": "Sistema",
 			"cpu": "CPU",
 			"mem": "Mem",
-			"disk": "Disco"
+			"disk": "Disco",
+			"remaining_value": "Valor restante",
+			"monthly_cost": "Custo mensal"
 		}
 	},
 	"group": {

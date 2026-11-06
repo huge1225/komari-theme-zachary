@@ -139,7 +139,9 @@
 			"up": "பதிவேற்றம்",
 			"down": "பதிவிறக்கம்",
 			"up_total": "மொத்த பதிவேற்றம்",
-			"down_total": "மொத்த பதிவிறக்கம்"
+			"down_total": "மொத்த பதிவிறக்கம்",
+			"remaining_value": "Remaining Value",
+			"monthly_cost": "Monthly Cost"
 		}
 	},
 	"serverOnlineHistory": {

@@ -86,8 +86,14 @@ export default function ServerDetailChart({
 		return <ServerDetailChartLoading />;
 	}
 
-	const gpuStats = server.state.gpu || [];
-	const gpuList = server.host.gpu || [];
+	const gpuList = (server.host.gpu || []).filter(
+		(g) =>
+			g &&
+			!/^(?:none|null|undefined|n\/a|na|nil|false|0|-|unknown|无|未知)$/i.test(
+				g.trim(),
+			),
+	);
+	const gpuStats = gpuList.length > 0 ? server.state.gpu || [] : [];
 	const gpuDetails = server.state.gpus || [];
 	const chartResetKey = `${server.id}:${selectedPeriod}`;
 
@@ -108,43 +114,25 @@ export default function ServerDetailChart({
 						period={selectedPeriod}
 					/>
 				</LocalErrorBoundary>
-				{gpuStats.length >= 1 && gpuList.length === gpuStats.length
-					? gpuList.map((gpu, index) => (
-							<LocalErrorBoundary
-								title={`GPU: ${gpu}`}
-								resetKey={chartResetKey}
-								key={index}
-							>
-								<GpuChart
-									index={index}
-									id={server.id}
-									gpuStat={gpuStats[index]}
-									gpuName={gpu}
-									gpuMemory={gpuDetails[index]}
-									series={series}
-									period={selectedPeriod}
-								/>
-							</LocalErrorBoundary>
-						))
-					: gpuStats.length > 0
-						? gpuStats.map((gpu, index) => (
-								<LocalErrorBoundary
-									title={`GPU #${index + 1}`}
-									resetKey={chartResetKey}
-									key={index}
-								>
-									<GpuChart
-										index={index}
-										id={server.id}
-										gpuStat={gpu}
-										gpuName={`#${index + 1}`}
-										gpuMemory={gpuDetails[index]}
-										series={series}
-										period={selectedPeriod}
-									/>
-								</LocalErrorBoundary>
-							))
-						: null}
+				{gpuList.length >= 1 &&
+					gpuStats.length >= 1 &&
+					gpuList.map((gpu, index) => (
+						<LocalErrorBoundary
+							title={`GPU: ${gpu}`}
+							resetKey={chartResetKey}
+							key={index}
+						>
+							<GpuChart
+								index={index}
+								id={server.id}
+								gpuStat={gpuStats[index] ?? 0}
+								gpuName={gpu}
+								gpuMemory={gpuDetails[index]}
+								series={series}
+								period={selectedPeriod}
+							/>
+						</LocalErrorBoundary>
+					))}
 				<LocalErrorBoundary
 					title={t("serverDetailChart.mem")}
 					resetKey={chartResetKey}

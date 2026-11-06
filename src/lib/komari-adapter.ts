@@ -730,11 +730,20 @@ export function convertKomariToNezhaServer(
 			? `${node.cpu_cores} Cores`
 			: "";
 
+	const isRealGpuName = (name?: string): boolean => {
+		if (!name) return false;
+		const cleaned = name.trim();
+		if (!cleaned) return false;
+		return !/^(?:none|null|undefined|n\/a|na|nil|false|0|-|unknown|无|未知|未检测到)$/i.test(
+			cleaned,
+		);
+	};
+
 	const gpuNames = node.gpu_name
 		? node.gpu_name
 				.split(/[;,]/)
 				.map((s) => s.trim())
-				.filter(Boolean)
+				.filter(isRealGpuName)
 		: [];
 
 	let gpuUtilizations: number[] = [];
@@ -750,19 +759,27 @@ export function convertKomariToNezhaServer(
 		gpuUtilizations = [status.gpu];
 	} else if (typeof status?.gpu === "object" && status?.gpu) {
 		const gpuObj = status.gpu;
-		if (
-			Array.isArray(gpuObj.detailed_info) &&
-			gpuObj.detailed_info.length > 0
-		) {
-			gpuUtilizations = gpuObj.detailed_info.map(
+		const validDetails = Array.isArray(gpuObj.detailed_info)
+			? gpuObj.detailed_info.filter(
+					(g) =>
+						isRealGpuName(g.name) ||
+						(typeof g.utilization === "number" && g.utilization > 0) ||
+						(typeof g.memory_total === "number" && g.memory_total > 0),
+				)
+			: [];
+		if (validDetails.length > 0) {
+			gpuUtilizations = validDetails.map(
 				(g) => g.utilization ?? gpuObj.average_usage ?? 0,
 			);
-			gpusDetailed = gpuObj.detailed_info.map((g) => ({
+			gpusDetailed = validDetails.map((g) => ({
 				utilization: g.utilization ?? 0,
 				memory_used: g.memory_used,
 				memory_total: g.memory_total,
 			}));
-		} else if (typeof gpuObj.average_usage === "number") {
+		} else if (
+			typeof gpuObj.average_usage === "number" &&
+			(gpuNames.length > 0 || gpuObj.average_usage > 0)
+		) {
 			gpuUtilizations = [gpuObj.average_usage];
 		}
 	}

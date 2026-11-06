@@ -594,12 +594,28 @@ export default function ServerDetailOverview({
 							</CardContent>
 						</Card>
 					)}
-					{gpu_info.length > 0 && (
+					{gpu_info.filter(
+						(g) =>
+							g &&
+							!/^(?:none|null|undefined|n\/a|na|nil|false|0|-|unknown|无|未知)$/i.test(
+								g.trim(),
+							),
+					).length > 0 && (
 						<Card className="rounded-[10px] bg-transparent border-none shadow-none ring-0">
 							<CardContent className="px-1.5 py-1">
 								<section className="flex flex-col items-start gap-0.5">
 									<p className="text-xs text-muted-foreground">{"GPU"}</p>
-									<div className="text-xs">{gpu_info.join(", ")}</div>
+									<div className="text-xs">
+										{gpu_info
+											.filter(
+												(g) =>
+													g &&
+													!/^(?:none|null|undefined|n\/a|na|nil|false|0|-|unknown|无|未知)$/i.test(
+														g.trim(),
+													),
+											)
+											.join(", ")}
+									</div>
 								</section>
 							</CardContent>
 						</Card>
